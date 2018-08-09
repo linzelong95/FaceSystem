@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>登录界面</title>
+	<meta charset="utf-8">
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+	<script src="js/hidpi-canvas.min.js"></script>
+	<style type="text/css">
+		*{margin:0;padding:0;}
+		html,body{width:100%;height:100%;overflow:hidden;}
+		body{background:url(img/index4.jpg) no-repeat center;}
+		#headtitle{line-height:250px;width:500px;height:155px;background:url(img/head.gif) repeat center;color:orange;margin:0 0 0 280px;font-size:50px;letter-spacing:10px;font-weight:bold;}
+		.media{position:relaitve;width:400px;height:400px;margin:0 0 0 250px;overflow:hidden;border-radius:50%;}
+		#login{float:left;cursor:pointer;width:150px;height:50px;background:blue;margin:0 0 0 330px;text-align:center;line-height:48px;border-radius:50px;letter-spacing:5px;color:white;font-weight:bold;font-size:18px;}
+		#canvas{display:none;}
+		#scan{display:none;position:absolute;z-index:999;top:190px;left:215px;width:430px;height:310px;background:url(img/scan2.gif);}	
+		#scan1{display:none;position:absolute;z-index:1000;top:200px;left:270px;width:430px;height:310px;background:url(img/scan.gif);}	
+		#RegisterAndId{float:left;width:80px;height:50px;margin:0 0 0 10px;}
+		#LoginById{cursor:pointer;width:75px;height:23px;background:red;text-align:center;border-radius:50px;}
+		#Register{cursor:pointer;width:75px;height:23px;background:red;text-align:center;margin:4px 0 0 0;border-radius:50px;}
+		a{text-decoration:none;color:white;font-size:13px;letter-spacing:1px;}
+		a:hover{color:yellow;}
+		#message{display:none;cursor:pointer;width:350px;height:250px;position:absolute;z-index:1000;background:url(img/tip.jpg) center;top:0px;left:275px;text-align:center;border-radius:50px;}
+		#loading{display:none;width:400px;height:400px;position:absolute;z-index:2002;background:url(img/loading.gif) center;top:205px;left:250px;text-align:center;border-radius:50px;}
+		#click{position:absolute;top:190px;left:134px;color:white;letter-spacing:6px;font-size:20px;font-weight:bold;background:blue;border-radius:20px;width:80px;height:40px;text-align:center;line-height:40px;}
+		#tip{position:absolute;top:100px;left:45px;color:red;letter-spacing:5px;font-size:20px;font-weight:bold;}
+		#loadtip{position:absolute;top:50px;left:100px;color:red;letter-spacing:5px;font-style:italic;font-size:35px;font-weight:bold;}
+		#middle{border:3px dashed #00EE00;display:none;position:absolute;z-index:2000;top:255px;left:375px;width:150px;height:200px;}
+		audio{display:none;}
+	</style>
+  </head> 
+  <body>
+    <div id="headtitle">刷脸登录系统</div>
+    <div id="message"><span id="tip">点击登录时，请注意：<br>1.请不要佩戴眼镜<br>2.请配合语音提示</span><input type="button" id="click" value="&nbsp;确认"></div>
+    <div id="loading"><span id="loadtip">Loading...</span></div>
+    <div class="media">
+    	<video id="video"></video>
+    	<canvas id="canvas" width="400px" height="300px"></canvas>
+    	<div id="middle"></div>
+    	<div id="scan"></div>
+    	<div id="scan1"></div>
+    </div>
+    <div>
+	    <input type="button" id="login" value="&nbsp;刷脸登录">
+	    <div id="RegisterAndId">
+	    	<div id="LoginById"><a href="LoginById.jsp">&nbsp;账号登录</a></div>
+	    	<div id="Register"><a href="Register.html">&nbsp;注册账户</a></div>
+	    </div>
+    </div>
+    <audio id="audiotip" src="audio/tip.mp3" preload="auto"></audio>
+  </body>
+  	<script type="text/javascript">
+		var video=document.getElementById("video");
+		var canvas=document.getElementById("canvas");
+		var btn=document.getElementById("login");
+		var getUserMedia=(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||navigator.msGetUserMedia);
+		getUserMedia.call(navigator,{video:true,audio:false},function(localMediaStream){
+			var src=window.URL.createObjectURL(localMediaStream);
+			$("#video").attr({"src":src,height:"400px",width:"400px",autoplay:"autoplay"});
+			//video.src=window.URL.createObjectURL(localMediaStream);
+			//video.onloadedmedata=function(){video.play();}
+		},function(e){
+			console.log("获取摄像头失败！",e);
+		});
+		
+		var loop=window.setInterval(function(){
+			if(!$("#video").attr("src")){
+				alert("请启动摄像功能");
+			}else{
+				$("#message").css({"display":"block"});
+				$("#message").animate({top:"230px"});
+				$("#message").click(function(){
+					$("#message").hide();
+					$("#middle").css({"display":"block"});
+				});
+				window.clearInterval(loop);
+			}
+		},"3000");
+		
+		btn.onclick=function(){
+			$("#scan").css({"display":"block"});
+			$("#scan1").css({"display":"block"});
+			if(!$("#video").attr("src")){
+				alert("请开启录像");
+				window.location.reload(true);
+				return false;
+			}
+			document.getElementById("audiotip").play();
+		    var ctx = canvas.getContext('2d');
+		    var getPixelRatio = function(context) {
+		        var backingStore = context.backingStorePixelRatio ||
+		            context.webkitBackingStorePixelRatio ||
+		            context.mozBackingStorePixelRatio ||
+		            context.msBackingStorePixelRatio ||
+		            context.oBackingStorePixelRatio ||
+		            context.backingStorePixelRatio || 1;
+		        return (window.devicePixelRatio || 1) / backingStore;
+		    };
+		    var ratio = getPixelRatio(ctx); 
+		    
+		    //定义图片数组
+		    var faceBase=new Array();
+		    
+		    ctx.drawImage(video, 0, 0, canvas.width * ratio, canvas.height * ratio);
+		    var imgSrc=canvas.toDataURL("image/png");
+		    faceBase[0]=imgSrc.split(",")[1];
+		    var firstResult=null;
+		    $.ajax({
+					url:"IsFaceServlet",//IsFaceServlet.java
+					type:"post",
+					dataType:"text",
+					traditional:true,
+					data:{"faceBase":faceBase},
+					success:function(result){
+						var data=result.toString();					
+							if(data.indexOf("Welcome") != -1){
+								firstResult=data;
+							}else{
+								document.getElementById("audiotip").pause();
+								if(data.length>5){								
+									alert("验证失败！系统内部原因："+data);		
+								}else{
+									alert("验证失败！原因：您可能未注册账户，或者系统获取人脸出错！请重试！  "+data);
+								}
+								window.location.reload(true);
+							}	
+					},
+					error: function (XMLHttpRequest, textStatus, errorThrown) {
+						alert("页面异常"+" "+XMLHttpRequest.status+" "+XMLHttpRequest.readyState+" "+textStatus);
+						window.location.reload(true);
+	        		}
+	   			 });
+
+
+		    		    
+		    var num=1;
+		    //循环截取5张图片,半秒截取一次,加上上面一张共6张
+		    var grap=window.setInterval(function(){
+		    	ctx.drawImage(video, 0, 0, canvas.width * ratio, canvas.height * ratio);
+		    	imgSrc=canvas.toDataURL("image/png");
+		    	faceBase[num]=imgSrc.split(",")[1];
+		    	num++;
+		    	if(num>4){
+		    		$("#loading").show();
+		    		function rowback(){
+		    			if($("#loadtip").css("top")==="300px"){
+		    				$("#loadtip").css("top","50px");
+		    			}else if($("#loadtip").css("top")==="50px"){
+		    				$("#loadtip").css("top","300px");
+		    			}
+		    			$("#loadtip").animate({top:"300px"},1000,rowback);
+		    		}
+		    		$("#loadtip").animate({top:"300px"},1000,rowback);
+			    	window.clearInterval(grap);
+					//while(true){
+			    	//if(firstResult!=null){
+			    		$.ajax({
+							url:"LoginByFaceServlet",//LoginByFaceServlet.java
+							type:"post",
+							dataType:"text",
+							traditional:true,
+							data:{"faceBase":faceBase},
+							success:function(result){
+								var data2=result.toString();					
+								if(data2.indexOf("pass") != -1){
+									window.location.href=firstResult;
+								}else{			
+									alert("验证失败！原因："+data2);
+									$("#loading").hide();
+									$("#scan").hide();
+									$("#scan1").hide();
+									//window.location.reload(true);
+								}	
+							},
+							error: function (XMLHttpRequest, textStatus, errorThrown) {
+								alert("页面异常"+" "+XMLHttpRequest.status+" "+XMLHttpRequest.readyState+" "+textStatus);
+								window.location.reload(true);
+			        		}
+			   			 });
+			    	}	
+			   // }
+			   // }
+		    },"1000");
+		}
+	</script>
+</html>

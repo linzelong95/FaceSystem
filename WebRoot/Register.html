@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>注册界面</title>
+	<meta charset="utf-8">
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+	<script src="js/hidpi-canvas.min.js"></script>
+	<style type="text/css">
+		*{margin:0;padding:0;}
+		html,body{width:100%;height:100%;}
+		body{position:relative;background:url(img/index1.jpg) no-repeat center;overflow:hidden;}
+		h1{color:red;text-align:center;margin:20px auto 0;font-size:50px;letter-spacing:10px;}
+		.media{position:relaitve;width:400px;height:370px;margin:0 0 0 480px;overflow:hidden;}
+		#register{float:left;cursor:pointer;width:150px;height:50px;background:blue;margin:10px 0 0 580px;text-align:center;line-height:48px;border-radius:50px;letter-spacing:5px;color:white;font-weight:bold;font-size:18px;}
+		#LoginByFace{float:left;cursor:pointer;width:75px;height:25px;background:red;margin:35px 0 0 10px;text-align:center;line-height:20px;border-radius:50px;color:white;font-weight:bold;}
+		#canvas{display:none;}
+		span{color:white;}
+		input{width:160px;height:25px;}
+		#in{width:350px;height:70px;margin:20px 0 0 565px;}
+		a{text-decoration:none;color:white;font-size:13px;letter-spacing:1px;}
+		a:hover{color:yellow;}
+		#warnning{color:white;font-size:15px;font-style:italic;font-weight:bold;}
+		#warn{background:red;margin:0 0 0 550px;width:260px;border-radius:50px;z-index:1111;}
+		#scan{display:none;position:absolute;z-index:999;top:205px;left:450px;width:430px;height:300px;background:url(img/scan1.gif);}
+		#middle{border:3px dashed #00EE00;display:none;position:absolute;z-index:111;top:255px;left:600px;width:150px;height:200px;}
+		#message{display:none;cursor:pointer;width:350px;height:250px;position:absolute;z-index:1000;background:url(img/tip.jpg) center;top:0px;left:505px;text-align:center;border-radius:50px;color:red;font-size:25px;font-weight:bold;}
+		#click{position:absolute;top:190px;left:134px;color:white;letter-spacing:6px;font-size:20px;font-weight:bold;background:blue;border-radius:20px;width:80px;height:40px;text-align:center;line-height:40px;}
+		#tip{position:absolute;top:100px;left:45px;color:red;letter-spacing:5px;font-size:20px;font-weight:bold;}
+	</style>
+  </head> 
+  <body>
+    <h1>注册账号</h1>
+    <div id="in">
+	    <span>账&nbsp;号：</span><input type="text" id="user" name="user" placeholder="请输入用户名" required><br><br>
+	    <span>密&nbsp;码：</span><input type="password" id="pwd" name="pwd" placeholder="请输入密码" required>
+    </div>
+    <div id="message"><span id="tip">点击注册时，请注意：<br>1.请确保人脸居中<br>2.请不要佩戴眼镜</span><input type="button" id="click" value="&nbsp;确认"></div>
+    <div class="media">
+    	<video id="video"></video>
+    	<canvas id="canvas" height="600px" width="800px"></canvas>
+    	<div id="middle"></div>
+    	<div id="scan"></div>
+    </div>
+    <div id="warn">
+    	&nbsp;&nbsp;<img src="img/warnning.png" width="25px" height="20px"><span id="warnning">点击注册前，请确保面部居中!!!</span>
+    </div>
+    <input type="button" id="register" value="&nbsp;点击注册">
+    <div id="LoginByFace"><a href="LoginByFace.html">&nbsp;已有账号</a></div>
+  </body>
+  	<script type="text/javascript">
+		var video=document.getElementById("video");
+		var canvas=document.getElementById("canvas");		
+		var getUserMedia=(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia ||navigator.msGetUserMedia);
+		getUserMedia.call(navigator,{video:true,audio:false},function(localMediaStream){
+			var src=window.URL.createObjectURL(localMediaStream);
+			$("#video").attr({"src":src,height:"400px",width:"400px",autoplay:"autoplay"});
+			//video.src=window.URL.createObjectURL(localMediaStream);
+			//video.onloadedmedata=function(){video.play();}
+		},function(e){
+			console.log("获取摄像头失败！",e);
+		});
+		setTimeout(function(){
+			$("#message").css({"display":"block"});
+			$("#message").animate({top:"230px"});
+			$("#message").click(function(){
+				$("#message").fadeOut(2000);
+				$("#middle").css({"display":"block"});
+			});
+		},"3000");
+		$("#register").unbind('click').click(function(){
+			var user=$("#user").val();
+			var pwd=$("#pwd").val();
+			if(user.trim().length==0){
+				alert("请输入用户名");
+				$("#user").focus();
+				return false;
+			}else if(pwd.trim().length==0){
+				alert("请输入密码");
+				$("#pwd").focus();
+				return false;
+			}else if(!$("#video").attr("src")){
+				alert("请开启录像");
+				return false;
+			}else{
+				$("#scan").css({"display":"block"});
+				var ctx = canvas.getContext('2d');
+			    var getPixelRatio = function(context) {
+			        var backingStore = context.backingStorePixelRatio ||
+			            context.webkitBackingStorePixelRatio ||
+			            context.mozBackingStorePixelRatio ||
+			            context.msBackingStorePixelRatio ||
+			            context.oBackingStorePixelRatio ||
+			            context.backingStorePixelRatio || 1;
+			        return (window.devicePixelRatio || 1) / backingStore;
+			    };
+			    var ratio = getPixelRatio(ctx);   
+			    ctx.drawImage(video, 0, 0, 800 * ratio, 600 * ratio);
+				var imgSrc=canvas.toDataURL("image/png");
+				var base64=imgSrc.split(",")[1];
+				$.ajax({
+					url:"RegisterServlet",//RegisterServlet.java
+					type:"post",
+					dataType:"text",
+					data:{"base64":base64,"username":user,"password":pwd},
+					success:function(result){
+						if(result.toString()=="注册成功"){
+							window.location.href="RegisterSuccess.html";
+						}else{
+							alert(result);
+							$("#scan").css({"display":"none"});
+							//window.location.reload(true);
+						}						
+					},
+					error: function (XMLHttpRequest, textStatus, errorThrown) {
+						alert("页面异常"+" "+XMLHttpRequest.status+" "+XMLHttpRequest.readyState+" "+textStatus);
+						window.location.reload(true);
+        			}
+				});
+			}		
+		});
+	</script>
+</html>
